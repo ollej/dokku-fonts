@@ -1,0 +1,4 @@
+[plugin]
+description = "Dokku plugin to add system fonts to image"
+version = "0.0.1"
+[plugin.config]

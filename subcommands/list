@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+
+fonts_list_cmd() {
+  declare desc="Lists font in app"
+  declare cmd="fonts:list" argv=("$@")
+  [[ ${argv[0]} == "$cmd" ]] && shift 1
+  declare APP="$1"
+  declare FONT_FILE="$2"
+  local FONTS_PATH="$DOKKU_ROOT/$APP/fonts"
+
+  [[ -z "$APP" ]] && dokku_log_fail "Please specify an app to run the command on"
+  verify_app_name "$APP"
+
+  mkdir -p "$FONTS_PATH"
+  ls -1 "$FONTS_PATH"
+}
+
+fonts_list_cmd "$@"

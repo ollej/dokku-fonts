@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+
+function fonts_install_font() {
+    local APP="$1"
+    local IMAGE=$(get_app_image_name $APP)
+    verify_app_name "$APP"
+
+    local file_path="$2"
+    local file=$(basename $file_path)
+    local system_font_path=/usr/local/share/fonts
+    local fonts_path="$DOKKU_ROOT/$APP/fonts"
+    dokku_log_verbose "- Copying font $file"
+    local id=$("$DOCKER_BIN" run -i -a stdin $IMAGE /bin/bash -c "cat > $system_font_path/$file" < "$fonts_path/$file")
+    test $("$DOCKER_BIN" wait $id) -eq 0
+    $DOCKER_BIN commit $id $IMAGE > /dev/null
+}
+
+function fonts_update_fccache() {
+    local APP="$1"
+    local IMAGE=$(get_app_image_name $APP)
+    verify_app_name "$APP"
+
+    local cmd="fc-cache"
+    dokku_log_verbose "- Running $cmd"
+    local idFontCache=$($DOCKER_BIN run $DOKKU_GLOBAL_RUN_ARGS -d $IMAGE /bin/bash -c "$cmd")
+    test $("$DOCKER_BIN" wait $idFontCache) -eq 0
+    $DOCKER_BIN commit $idFontCache $IMAGE > /dev/null
+}
+
+function fonts_install() {
+    local APP="$1"
+    local IMAGE=$(get_app_image_name $APP)
+    verify_app_name "$APP"
+
+    local fonts_path="$DOKKU_ROOT/$APP/fonts"
+    local fonts_installed=$(ls -1 "$fonts_path" | grep -v '/$' | wc -l)
+    if [[ "$fonts_installed" -gt "0" ]]
+    then
+        dokku_log_info1 "Installing system fonts..."
+
+        for file_path in "$fonts_path/*"
+        do
+            fonts_install_font "$APP" "$file_path"
+        done
+        fonts_update_fccache "$APP"
+    else
+        dokku_log_verbose "- No fonts to install"
+    fi
+}

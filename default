@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+
+fonts_main_cmd() {
+  declare desc="Installs system fonts during app deployment"
+  declare cmd="fonts" argv=("$@")
+  [[ ${argv[0]} == "$cmd" ]] && shift 1
+
+  help_content_func
+}
+
+fonts_main_cmd "$@"

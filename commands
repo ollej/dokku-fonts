@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+case "$1" in
+  help | fonts:help)
+    help_content_func () {
+      declare desc="return help_content string"
+      cat<<help_content
+    fonts:add <app> <font>, Adds font to app to be installed on build
+    fonts:remove <app> <font>, Removes font from app so it won't be installed on next build
+    fonts:list <app>, List fonts to be installed on next build
+help_content
+    }
+
+    if [[ $1 = "fonts:help" ]] ; then
+        echo -e 'Usage: dokku fonts[:COMMAND]'
+        echo ''
+        echo 'Manages system fonts to install in image on build'
+        echo ''
+        echo 'Example:'
+        echo ''
+        echo '$ dokku fonts:add my-app arial.ttf'
+        echo ''
+        echo 'Additional commands:'
+        help_content_func | sort | column -c2 -t -s,
+    else
+        cat<<help_desc
+    fonts, Manage fonts to be installed in image during deployment
+help_desc
+    fi
+    ;;
+
+  *)
+    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+    ;;
+
+esac
