@@ -35,6 +35,9 @@ function fonts_install() {
     verify_app_name "$APP"
 
     local fonts_path="$DOKKU_ROOT/$APP/fonts"
+    if [ ! -d "$fonts_path" ]; then
+        mkdir "$fonts_path"
+    fi
     local fonts_installed=$(ls -1 "$fonts_path" | grep -v '/$' | wc -l)
     if [[ "$fonts_installed" -gt "0" ]]
     then
