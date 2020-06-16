@@ -43,7 +43,7 @@ function fonts_install() {
     then
         dokku_log_info1 "Installing system fonts..."
 
-        for file_path in "$fonts_path/*"
+        for file_path in $fonts_path/*
         do
             fonts_install_font "$APP" "$file_path"
         done
