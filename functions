@@ -12,9 +12,11 @@ function fonts_install_font() {
     local system_font_path=/usr/local/share/fonts
     local fonts_path="$DOKKU_ROOT/$APP/fonts"
     dokku_log_verbose "- Copying font $file"
-    local id=$("$DOCKER_BIN" run -i -a stdin $IMAGE /bin/bash -c "cat > $system_font_path/$file" < "$fonts_path/$file")
-    test $("$DOCKER_BIN" wait $id) -eq 0
-    $DOCKER_BIN commit $id $IMAGE > /dev/null
+    "$DOCKER_BIN" run -i -a stdin --cidfile="$CID_FILE" $IMAGE /bin/bash -c "cat > $system_font_path/$file" < "$fonts_path/$file"
+    CID="$(cat "$CID_FILE")"
+    rm -f "$CID_FILE"
+    test $("$DOCKER_BIN" wait $CID) -eq 0
+    $DOCKER_BIN commit $CID $IMAGE > /dev/null
 }
 
 function fonts_update_fccache() {
@@ -24,9 +26,11 @@ function fonts_update_fccache() {
 
     local cmd="fc-cache"
     dokku_log_verbose "- Running $cmd"
-    local idFontCache=$($DOCKER_BIN run $DOKKU_GLOBAL_RUN_ARGS -d $IMAGE /bin/bash -c "$cmd")
-    test $("$DOCKER_BIN" wait $idFontCache) -eq 0
-    $DOCKER_BIN commit $idFontCache $IMAGE > /dev/null
+    $DOCKER_BIN run $DOKKU_GLOBAL_RUN_ARGS --cidfile="$CID_FILE" -d $IMAGE /bin/bash -c "$cmd"
+    CID="$(cat "$CID_FILE")"
+    rm -f "$CID_FILE"
+    test $("$DOCKER_BIN" wait $CID) -eq 0
+    $DOCKER_BIN commit $CID $IMAGE > /dev/null
 }
 
 function fonts_install() {
