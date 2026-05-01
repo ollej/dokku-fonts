@@ -3,6 +3,9 @@ dokku-fonts
 
 Dokku plugin to install system fonts to a dokku app.
 
+This plugin is **DEPRECATED** as the functionality is now available in Dokku
+core.
+
 Installation
 ------------
 
